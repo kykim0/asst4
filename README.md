@@ -81,11 +81,10 @@ You can run your code, checking correctness and performance against the staff re
 
     ./pr <PATH_TO_GRAPHS_DIRECTORY>/com-orkut_117m.graph 
     
-If you are working on a myth machine, we've located a copy of the graphs directory at `/afs/ir.stanford.edu/class/cs149/data/asst3_graphs/`.  You can also download the graphs from <http://cs149.stanford.edu/cs149asstdata/all_graphs.tgz>. (On AWS, you can do: `wget /afs/ir.stanford.edu/class/cs149/data/asst3_graphs/`. On your local machine, please paste the preceding link into your browser to download the .tgz file. In both cases, be careful, this is a 3 GB download.) Some interesting real-world graphs include:
+If you are working on a myth machine, we've located a copy of the graphs directory at `/afs/ir.stanford.edu/class/cs149/data/asst3_graphs/`.  You can also download the graphs from <http://cs149.stanford.edu/cs149asstdata/all_graphs.tgz>. (On AWS, you can do: `wget http://cs149.stanford.edu/cs149asstdata/all_graphs.tgz` and then untar the resulting `all_graphs.tgz` file with `tar -xzvf all_graphs.tgz`. On your local machine, please paste the preceding link into your browser to download the .tgz file. In both cases, be careful, this is a 3 GB download.) Some interesting real-world graphs include:
 
  * com-orkut_117m.graph 
  * oc-pokec_30m.graph
- * rmat_200m.graph
  * soc-livejournal1_68m.graph
  
 Your useful synthetic, but large graphs include:
@@ -103,7 +102,7 @@ Your code should handle cases where there are no outgoing edges by distributing 
 
 You can also run our grading script via: `./pr_grader <path to graphs directory>`, which will report correctness and a performance points score for a number of graphs.
 
-__NOTE__: a common pitfall students hit when implementing `page_rank` is they find their implementation fails the correctness check based on very small differences between their code's output values and the reference. Since the errors are very small, it's reasonable to assume these are due to differences in the order of floating point arithmetic, and that the checker should be more lenient in its checks.  However, our experience is that this is *almost, almost always an error in the student's code*. 
+__NOTE__: a common pitfall students hit when implementing `page_rank` is they find their implementation fails the correctness check based on very small differences between their code's output values and the reference. Since the errors are very small, it's reasonable to (often incorrectly) assume these differences in value are due to differences in the order of floating point arithmetic between the student and reference solution, and that the checker should be more lenient in its checks.  However, our experience is that observing these differences is *almost, almost always an error in the student's code*. 
 
 __Tips:__ 
 
@@ -116,7 +115,7 @@ Accumulating into a shared variable can be done by marking the variable as a "re
          mySum += A[i];
      }
 
-## Part 2: Parallel Breadth-First Search ("Top Down") ##
+## Part 2: Parallel "Top Down" Breadth-First Search (20 points) ##
 
 Breadth-first search (BFS) is a common algorithm that might have seen in a prior algorithms class (See [here](https://www.hackerearth.com/practice/algorithms/graphs/breadth-first-search/tutorial/) and [here](https://www.youtube.com/watch?v=oDqjPvD54Ss) for helpful references.)
 Please familiarize yourself with the function `bfs_top_down()` in `bfs/bfs.cpp`, which contains a sequential implementation of BFS. The code uses BFS to compute the distance to vertex 0 for all vertices in the graph. You may wish to familiarize yourself with the graph structure defined in `common/graph.h` as well as the simple array data structure `vertex_set` (`bfs/bfs.h`), which is an array of vertices used to represent the current frontier of BFS.
@@ -139,7 +138,7 @@ __Tips/Hints:__
 * Are there conditions where it is possible to avoid using `compare_and_swap`?  In other words, when you *know* in advance that the comparison will fail?
 * There is a preprocessor macro `VERBOSE` to make it easy to disable useful print per-step timings in your solution (see the top of `bfs/bfs.cpp`).  In general, these printfs occur infrequently enough (only once per BFS step) that they do not notably impact performance, but if you want to disable the printfs during timing, you can use this `#define` as a convenience.
 
-### Part 3: "Bottom Up" BFS ###
+## Part 3: "Bottom Up" BFS (25 points) ##
 
 Think about what behavior might cause a performance problem in the BFS implementation from Part 1.2.  An alternative implementation of a breadth-first search step may be more efficient in these situations.  Instead of iterating over all vertices in the frontier and marking all vertices adjacent to the frontier, it is possible to implement BFS by having *each vertex check whether it should be added to the frontier!*  Basic pseudocode for the algorithm is as follows:
 
@@ -157,7 +156,7 @@ __Tips/Hints:__
 * It may be useful to think about how you represent the set of unvisited nodes.  Do the top-down and bottom-up versions of the code lend themselves to different implementations?  
 * How do the synchronization requirements of the bottom-up BFS change?
 
-## Part 4: Hybrid BFS (70 points) ##
+## Part 4: Hybrid BFS (25 points) ##
 
 Notice that in some steps of the BFS, the "bottom up" BFS is signficantly faster than the top-down version.  In other steps, the top-down version is signficantly faster.  This suggests a major performance improvement in your implementation, if __you could dynamically choose between your "top down" and "bottom up" formulations based on the size of the frontier or other properties of the graph!__  If you want a solution competitive with the reference one, your implementation will likely have to implement this dynamic optimization.  Please provide your solution in `bfs_hybrid()` in `bfs/bfs.cpp`.
 
@@ -169,12 +168,14 @@ You can run our grading script via: `./bfs_grader <path to graphs directory>`, w
 
 ## Grading and Handin ##
 
+We have a leaderboard for this assignment, which will be live at [http://34.218.250.164/](http://34.218.250.164/). For the leaderboard, we will run your code on a subset of the BFS tests.
+
 Along with your code, we would like you to hand in a clear but concise high-level description of how your implementation works as well as a brief description of how you arrived at your solutions. Specifically address approaches you tried along the way, and how you went about determining how to optimize your code (For example, what measurements did you perform to guide your optimization efforts?).
 
 Aspects of your work that you should mention in the write-up include:
 
 1. Include both partners' names at the top of your write-up.
-2. Run bfs_grader and pr_grader on GCP and insert a copy of the score table in your solutions.
+2. Run bfs_grader and pr_grader on AWS and insert a copy of the score table in your solutions.
 3. For bfs, describe the process of optimizing your code:
  * In Part 2 (Top Down) and 3 (Bottom Up), where is the synchronization in each of your solutions? Do you do anything to limit the overhead of synchronization?
  * In Part 4 (Hybrid), did you decide to switch between the top-down and bottom-up BFS implementations dynamically? How did you decide which implementation to use?
@@ -187,6 +188,8 @@ The 100 points on this assignment are allotted as follows:
 * 16 points:  Pagerank performance
 * 70 points:  BFS performance
 * 14 points:  Write-up
+
+For your final grade, the above 100 points will be scaled by 0.94, with the other 0.06 of your grade coming from your performance on the BFS leaderboard.
 
 ## Hand-in Instructions ##
 
